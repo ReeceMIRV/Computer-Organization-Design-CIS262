@@ -1,0 +1,49 @@
+# Rewrite C statements
+#
+#    int i = 11;
+#    int j = 10;
+#
+#    int A[] = { 0x11, 0x22, 0x33 };
+#    int B[] = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 };
+#
+#    A[2] = B[ 7 + ( i ^ j ) ];
+#
+# in MIPS assembly. Assume that addresses of variables i, j, A, and B
+# are loaded into registers $s3, $s4, $s6, and $s7, respectively:
+# What value is assigned to A[2] in the last statement?
+#
+# Solution: The value assigned to A[2] is 8.
+
+    .eqv  SYSCALL_PRINT_INT  1
+    .eqv  SYSCALL_EXIT_PROG 10
+    .eqv  A2_OFFSET          8  # offset of element A[2] inside array A
+
+    .data
+i:  .word 11
+j:  .word 10
+A:  .word 0x11, 0x22, 0x33
+B:  .word 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8
+
+    .text
+    la $s3, i          # load address of i
+    la $s4, j          # load address of j
+    la $s6, A          # load address of A
+    la $s7, B          # load address of B
+    
+    lw $s3, 0($s3)     # load value of i
+    lw $s4, 0($s4)     # load value of j
+    
+    xor  $t0, $s3, $s4       # $t0 = i ^ j
+    addi $t0, $t0, 7         # $t0 = 7 + (i ^ j)
+    sll  $t0, $t0, 2         # $t0 = $t0 *4 (to scale by 4-byte sized int)
+    add  $t0, $s7, $t0       # $t0 = address of B[ $t0 ]
+    lw   $t1, 0($t0)         # $t1 = value of B[ 7 + ( i ^ j ) ]
+    sw   $t1, A2_OFFSET($s6) # save result in A[ 2 ]
+
+    li   $v0, SYSCALL_PRINT_INT
+    move $a0, $t1
+    syscall    
+
+    li $v0, SYSCALL_EXIT_PROG
+    syscall
+

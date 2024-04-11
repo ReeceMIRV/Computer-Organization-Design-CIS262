@@ -1,0 +1,29 @@
+    .eqv  SYSCALL_PRINT_STRING 4
+    .eqv  SYSCALL_EXIT_PROG    10
+     
+    .data   # data segment begins
+
+#  Define a greeting message:
+Message:
+    .asciiz    "Hello World!\n"
+    .align 2
+myarray:
+    .space 40  # reserve space for 10 integers
+
+    .text
+
+# Print the greeting message:
+    li $v0, SYSCALL_PRINT_STRING
+    la $a0, Message
+    syscall             # print string
+    
+    la $t2, myarray     # $t2 -> myarray
+    lw $t1, 4($t2)      # $t1 = myarray[1]
+    
+    li $t1, 0xAABBCCDD  # byte pattern to visualize word in memory
+    sw $t1, 4($t2)      # myarray[1] = $t1
+
+# Return to the operating system:
+    li $v0, SYSCALL_EXIT_PROG
+    syscall               # exit program
+    

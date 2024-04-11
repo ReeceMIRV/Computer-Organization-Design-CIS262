@@ -1,0 +1,39 @@
+# Add three numbers in memory and print the result
+
+    .data
+
+# string to print before the result
+STR_PROMPT: .asciiz "Result: "
+
+	.align 2
+# numbers to add
+nums:   .word -77, 13, -5    # numbers to add
+result: .word 0              # result
+
+    .text
+
+     # print the initial string
+     li      $v0, 4          # ask for print string service
+     la      $a0, STR_PROMPT
+     syscall
+
+     # load three numbers into registers
+     la     $t0, nums
+     lw     $t1, 0($t0)      # lw $t1, nums
+     lw     $t2, 4($t0)      # lw $t2, nums + 4
+     lw     $t3, 8($t0)      # lw $t3, nums + 8
+     
+     # add and store the result in $a0 for printing
+     add     $a0, $t1, $t2   # add the first two numbers
+     add     $a0, $a0, $t3   # add the third to the sum
+     
+     # save a0 in memory
+     sw      $a0, result
+
+     # print the result
+     li      $v0, 1          # ask for $a0 print service
+     syscall
+     
+     # exit
+     li      $v0, 10         # ask for exit service
+     syscall
